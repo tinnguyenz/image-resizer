@@ -12,8 +12,8 @@ services:
     command: python app.py
 
   front-api:
-    build: ./node-api
-    container_name: node-api
+    build: ./front-api
+    container_name: front-api
     restart: always
     ports:
       - "4000:4000"
