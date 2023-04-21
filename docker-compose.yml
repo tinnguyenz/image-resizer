@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  photos-api:
+    build: ./photos-api
+    container_name: photos-api
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./photos-api:/app
+    command: python app.py
+
+  front-api:
+    build: ./node-api
+    container_name: node-api
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      FLASK_API_URL: "http://photos-api:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+volumes:
+  app:
