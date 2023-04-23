@@ -1,6 +1,23 @@
 version: '3'
 
 services:
+  
+  db:
+    image: postgres
+    container_name: photos_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: photos
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./photos-api/data_volume:/var/lib/postgresql/data
+      - ./photos-api/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+    networks:
+      - app-network
+  
   photos-api:
     build: ./photos-api
     container_name: photos-api
@@ -9,7 +26,13 @@ services:
       - "3000:3000"
     volumes:
       - ./photos-api:/app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/photos
     command: python app.py
+    networks:
+      - app-network
 
   front-api:
     build: ./front-api
@@ -19,7 +42,12 @@ services:
       - "4000:4000"
     environment:
       FLASK_API_URL: "http://photos-api:3000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
 volumes:
-  app:
+  postgres-data:
